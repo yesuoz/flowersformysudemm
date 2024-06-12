@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Çiçek Sulama Uygulaması</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            height: 100vh;
+            margin: 0;
+            background-color: #2e2e2e;
+            color: white;
+            overflow: hidden;
+        }
+        #garden {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-grow: 1;
+            position: relative;
+        }
+        .flower {
+            position: absolute;
+            transition: transform 0.5s ease-in-out;
+        }
+        #waterButton {
+            padding: 10px 20px;
+            font-size: 16px;
+            cursor: pointer;
+            position: absolute;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 5px;
+        }
+        .waterEffect {
+            position: absolute;
+            width: 200px;
+            height: 200px;
+            border-radius: 50%;
+            background: rgba(173, 216, 230, 0.5);
+            animation: fadeOut 1s ease-out forwards;
+        }
+        @keyframes fadeOut {
+            from { opacity: 1; }
+            to { opacity: 0; }
+        }
+        @keyframes grow {
+            from { transform: scale(0); }
+            to { transform: scale(1); }
+        }
+
+        .flower {
+            transition: transform 0.5s ease-in-out;
+        }
+
+        #waterButton:active {
+            animation: buttonPress 0.2s ease;
+        }
+
+        @keyframes buttonPress {
+            0% { transform: scale(1); }
+            50% { transform: scale(0.9); }
+            100% { transform: scale(1); }
+        }
+    </style>
+</head>
+<body>
+    <h1>Çiçek Sulama Uygulaması</h1>
+    <div id="garden">
+    </div>
+    <button id="waterButton">Sulayıcı!</button>
+
+    <script>
+        let growthStage = 0;
+        let flowers = [];
+        const garden = document.getElementById('garden');
+
+        function createFlower(x, y) {
+            const flower = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+            flower.setAttribute('class', 'flower');
+            flower.setAttribute('viewBox', '0 0 200 200');
+            flower.setAttribute('width', '200');
+            flower.setAttribute('height', '200');
+            flower.style.left = `${x}px`;
+            flower.style.top = `${y}px`;
+
+            flower.innerHTML = `
+                <line class="stem" x1="100" y1="200" x2="100" y2="150" stroke="green" stroke-width="2"/>
+                <ellipse class="leaf" cx="95" cy="170" rx="10" ry="4" fill="green" transform="rotate(-30 95 170)" style="opacity: 0;"/>
+                <ellipse class="leaf" cx="105" cy="170" rx="10" ry="4" fill="green" transform="rotate(30 105 170)" style="opacity: 0;"/>
+                <circle class="center" cx="100" cy="140" r="5" fill="yellow" style="opacity: 0;"/>
+                <circle class="petal" cx="100" cy="130" r="5" fill="white" style="opacity: 0;"/>
+                <circle class="petal" cx="90" cy="135" r="5" fill="white" style="opacity: 0;"/>
+                <circle class="petal" cx="110" cy="135" r="5" fill="white" style="opacity: 0;"/>
+                <circle class="petal" cx="95" cy="145" r="5" fill="white" style="opacity: 0;"/>
+                <circle class="petal" cx="105" cy="145" r="5" fill="white" style="opacity: 0;"/>
+            `;
+            garden.appendChild(flower);
+            flowers.push(flower);
+        }
+
+        function growFlower(flower, stage) {
+            const stem = flower.querySelector('.stem');
+            const leaves = flower.querySelectorAll('.leaf');
+            const center = flower.querySelector('.center');
+            const petals = flower.querySelectorAll('.petal');
+
+            if (stage <= 4) {
+                stem.setAttribute('y2', 150 - stage * 5);
+                if (stage == 1) {
+                    leaves.forEach(leaf => leaf.style.opacity = 1);
+                }
+                if (stage == 2) {
+                    center.style.opacity = 1;
+                    petals.forEach(petal => petal.style.opacity = 1);
+                }
+            }
+        }
+
+        document.getElementById('waterButton').addEventListener('click', function() {
+            const x = Math.random() * (window.innerWidth - 200);
+            const y = Math.random() * (window.innerHeight - 200);
+            createFlower(x, y);
+
+            flowers.forEach((flower, index) => {
+                if (index < growthStage / 4) {
+                    growFlower(flower, 4);
+                } else {
+                    growFlower(flower, (growthStage % 4) + 1);
+                }
+            });
+
+            const waterEffect = document.createElement('div');
+            waterEffect.classList.add('waterEffect');
+            waterEffect.style.left = `${x}px`;
+            waterEffect.style.top = `${y}px`;
+            garden.appendChild(waterEffect);
+
+            setTimeout(() => {
+                waterEffect.remove();
+            }, 1000);
+
+            growthStage++;
+        });
+    </script>
+</body>
+</html>
